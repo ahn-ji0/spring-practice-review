@@ -7,21 +7,22 @@ import statementstrategy.AddStrategy;
 import statementstrategy.DeleteAllStrategy;
 import statementstrategy.StatementStrategy;
 
+import javax.sql.DataSource;
 import java.sql.*;
 import java.util.Map;
 
 public class UserDao {
-    private ConnectionMaker connectionMaker;
+    private DataSource dataSource;
 
-    public UserDao(ConnectionMaker connectionMaker) {
-        this.connectionMaker = connectionMaker;
+    public UserDao(DataSource dataSource) {
+        this.dataSource = dataSource;
     }
 
     public void jdbcContextStatementStrategy(StatementStrategy stmst) throws SQLException {
         Connection c = null;
         PreparedStatement ps = null;
         try {
-            c = connectionMaker.getConnection();
+            c = dataSource.getConnection();
 
             ps = stmst.getStatement(c);
 
@@ -46,11 +47,25 @@ public class UserDao {
         }
     }
     public void deleteAll() throws SQLException {
-        jdbcContextStatementStrategy(new DeleteAllStrategy());
+        jdbcContextStatementStrategy(new StatementStrategy() {
+            @Override
+            public PreparedStatement getStatement(Connection c) throws SQLException {
+                return c.prepareStatement("DELETE FROM users");
+            }
+        });
     }
 
     public void add(User user) throws SQLException {
-        jdbcContextStatementStrategy(new AddStrategy(user));
+        jdbcContextStatementStrategy(new StatementStrategy() {
+            @Override
+            public PreparedStatement getStatement(Connection c) throws SQLException {
+                PreparedStatement ps = c.prepareStatement("INSERT INTO users(id,name,password) VALUES(?,?,?)");
+                ps.setString(1,user.getId());
+                ps.setString(2, user.getName());
+                ps.setString(3,user.getPassword());
+                return ps;
+            }
+        });
     }
 
     public User getId(String id) throws SQLException {
@@ -59,7 +74,7 @@ public class UserDao {
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
-            c = connectionMaker.getConnection();
+            c = dataSource.getConnection();
             user = null;
 
             ps = c.prepareStatement("SELECT * FROM users WHERE id = ?");
@@ -110,7 +125,7 @@ public class UserDao {
         ResultSet rs = null;
         int count = 0;
         try {
-            c = connectionMaker.getConnection();
+            c = dataSource.getConnection();
 
             ps = c.prepareStatement("SELECT count(*) FROM users");
 
