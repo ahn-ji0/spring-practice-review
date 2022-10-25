@@ -13,50 +13,19 @@ import java.util.Map;
 
 public class UserDao {
     private DataSource dataSource;
+    private JdbcContext jdbcContext;
 
     public UserDao(DataSource dataSource) {
         this.dataSource = dataSource;
+        this.jdbcContext = new JdbcContext(dataSource);
     }
 
-    public void jdbcContextStatementStrategy(StatementStrategy stmst) throws SQLException {
-        Connection c = null;
-        PreparedStatement ps = null;
-        try {
-            c = dataSource.getConnection();
-
-            ps = stmst.getStatement(c);
-
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } finally {
-            if(ps!=null){
-                try{
-                    ps.close();
-                }catch (SQLException e){
-
-                }
-            }
-            if(c!=null){
-                try{
-                    c.close();
-                }catch (SQLException e){
-
-                }
-            }
-        }
-    }
     public void deleteAll() throws SQLException {
-        jdbcContextStatementStrategy(new StatementStrategy() {
-            @Override
-            public PreparedStatement getStatement(Connection c) throws SQLException {
-                return c.prepareStatement("DELETE FROM users");
-            }
-        });
+        jdbcContext.executeQuery("DELETE FROM users");
     }
 
     public void add(User user) throws SQLException {
-        jdbcContextStatementStrategy(new StatementStrategy() {
+        jdbcContext.jdbcContextStatementStrategy(new StatementStrategy() {
             @Override
             public PreparedStatement getStatement(Connection c) throws SQLException {
                 PreparedStatement ps = c.prepareStatement("INSERT INTO users(id,name,password) VALUES(?,?,?)");
