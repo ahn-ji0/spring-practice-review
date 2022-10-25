@@ -6,10 +6,10 @@ import java.sql.*;
 import java.util.Map;
 
 public class UserDao {
-    public void add(User user) throws SQLException {
-        Map<String,String> env = System.getenv();
+    private ConnectionClass connectionClass = new ConnectionClass();
 
-        Connection c = DriverManager.getConnection(env.get("DB_HOST"),env.get("DB_USER"),env.get("DB_PASSWORD"));
+    public void add(User user) throws SQLException {
+        Connection c = connectionClass.getConnection();
 
         PreparedStatement ps = c.prepareStatement("INSERT INTO users(id,name,password) VALUES(?,?,?)");
         ps.setString(1,user.getId());
@@ -23,12 +23,9 @@ public class UserDao {
     }
 
     public User getId(String id) throws SQLException {
-        Map<String,String> env = System.getenv();
+        Connection c = connectionClass.getConnection();
 
-        Connection c = DriverManager.getConnection(env.get("DB_HOST"),
-                env.get("DB_USER"),env.get("DB_PASSWORD"));
-
-        PreparedStatement ps = c.prepareStatement("SELECT FROM users WHERE id = ?");
+        PreparedStatement ps = c.prepareStatement("SELECT * FROM users WHERE id = ?");
         ps.setString(1,id);
 
         ResultSet rs = ps.executeQuery();
@@ -42,5 +39,33 @@ public class UserDao {
         c.close();
 
         return user;
+    }
+
+    public void deleteAll() throws SQLException {
+        Connection c = connectionClass.getConnection();
+
+        PreparedStatement ps = c.prepareStatement("DELETE FROM users");
+
+        ps.executeUpdate();
+
+        ps.close();
+        c.close();
+    }
+
+    public int getCount() throws SQLException {
+        Connection c = connectionClass.getConnection();
+
+        PreparedStatement ps = c.prepareStatement("SELECT count(*) FROM users");
+
+        ResultSet rs = ps.executeQuery();
+        rs.next();
+
+        int count = rs.getInt(1);
+
+        rs.close();
+        ps.close();
+        c.close();
+
+        return count;
     }
 }
