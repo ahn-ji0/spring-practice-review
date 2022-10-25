@@ -17,12 +17,12 @@ import java.util.Map;
 public class UserDao {
     private DataSource dataSource;
     private JdbcTemplate jdbcTemplate;
-//    private JdbcContext jdbcContext;
+    private JdbcContext jdbcContext;
 
     public UserDao(DataSource dataSource) {
         this.dataSource = dataSource;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
-//        this.jdbcContext = new JdbcContext(dataSource);
+        this.jdbcContext = new JdbcContext(dataSource);
     }
 
     public void add(User user){
@@ -61,10 +61,17 @@ public class UserDao {
         };
         return jdbcTemplate.query(sql,rowMapper);
     }
+
+
 //    public void deleteAll() throws SQLException {
 //        jdbcContext.executeQuery("DELETE FROM users");
 //    }
-//
+
+    //람다식
+//public int deleteAll2() throws SQLException {
+//    jdbcContext.jdbcContextStatementStrategy(c->c.prepareStatement("delete from users"));
+//}
+
 //    public void add(User user) throws SQLException {
 //        jdbcContext.jdbcContextStatementStrategy(new StatementStrategy() {
 //            @Override
