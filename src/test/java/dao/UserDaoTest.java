@@ -14,6 +14,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.sql.SQLException;
 import java.util.EmptyStackException;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -53,6 +54,17 @@ class UserDaoTest {
             userDao.getId("4");
         });
 
+    }
+
+    @Test
+    @DisplayName("Get all test")
+    public void getAll(){
+        userDao.add(user1);
+        userDao.add(user2);
+        userDao.add(user3);
+
+        List<User> userList = userDao.getAll();
+        assertEquals(3,userList.size());
     }
 }
 
