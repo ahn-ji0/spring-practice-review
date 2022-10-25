@@ -3,6 +3,9 @@ package dao;
 import connectionmaker.ConnectionMaker;
 import domain.User;
 import org.springframework.dao.EmptyResultDataAccessException;
+import statementstrategy.AddStrategy;
+import statementstrategy.DeleteAllStrategy;
+import statementstrategy.StatementStrategy;
 
 import java.sql.*;
 import java.util.Map;
@@ -14,16 +17,13 @@ public class UserDao {
         this.connectionMaker = connectionMaker;
     }
 
-    public void add(User user) throws SQLException {
+    public void jdbcContextStatementStrategy(StatementStrategy stmst) throws SQLException {
         Connection c = null;
         PreparedStatement ps = null;
         try {
             c = connectionMaker.getConnection();
 
-            ps = c.prepareStatement("INSERT INTO users(id,name,password) VALUES(?,?,?)");
-            ps.setString(1,user.getId());
-            ps.setString(2,user.getName());
-            ps.setString(3,user.getPassword());
+            ps = stmst.getStatement(c);
 
             ps.executeUpdate();
         } catch (SQLException e) {
@@ -44,6 +44,13 @@ public class UserDao {
                 }
             }
         }
+    }
+    public void deleteAll() throws SQLException {
+        jdbcContextStatementStrategy(new DeleteAllStrategy());
+    }
+
+    public void add(User user) throws SQLException {
+        jdbcContextStatementStrategy(new AddStrategy(user));
     }
 
     public User getId(String id) throws SQLException {
@@ -96,34 +103,6 @@ public class UserDao {
         }
     }
 
-    public void deleteAll() throws SQLException {
-        Connection c = null;
-        PreparedStatement ps = null;
-        try {
-            c = connectionMaker.getConnection();
-
-            ps = c.prepareStatement("DELETE FROM users");
-
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } finally {
-            if(ps!=null){
-                try{
-                    ps.close();
-                }catch (SQLException e){
-
-                }
-            }
-            if(c!=null){
-                try{
-                    c.close();
-                }catch (SQLException e){
-
-                }
-            }
-        }
-    }
 
     public int getCount() throws SQLException {
         Connection c = null;
