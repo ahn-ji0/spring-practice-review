@@ -1,5 +1,6 @@
 package dao;
 
+import connectionmaker.AWSConnectionMaker;
 import domain.User;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,7 +15,8 @@ class UserDaoTest {
     @DisplayName("Add and Get")
 
     public void addAndGet() throws SQLException {
-        UserDao userDao = new UserDao();
+        UserDaoFactory userDaoFactory = new UserDaoFactory();
+        UserDao userDao = userDaoFactory.AWSUserDao();
 
         userDao.deleteAll();
 

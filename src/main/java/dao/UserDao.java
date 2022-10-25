@@ -1,15 +1,20 @@
 package dao;
 
+import connectionmaker.ConnectionMaker;
 import domain.User;
 
 import java.sql.*;
 import java.util.Map;
 
 public class UserDao {
-    private ConnectionClass connectionClass = new ConnectionClass();
+    private ConnectionMaker connectionMaker;
+
+    public UserDao(ConnectionMaker connectionMaker) {
+        this.connectionMaker = connectionMaker;
+    }
 
     public void add(User user) throws SQLException {
-        Connection c = connectionClass.getConnection();
+        Connection c = connectionMaker.getConnection();
 
         PreparedStatement ps = c.prepareStatement("INSERT INTO users(id,name,password) VALUES(?,?,?)");
         ps.setString(1,user.getId());
@@ -23,7 +28,7 @@ public class UserDao {
     }
 
     public User getId(String id) throws SQLException {
-        Connection c = connectionClass.getConnection();
+        Connection c = connectionMaker.getConnection();
 
         PreparedStatement ps = c.prepareStatement("SELECT * FROM users WHERE id = ?");
         ps.setString(1,id);
@@ -42,7 +47,7 @@ public class UserDao {
     }
 
     public void deleteAll() throws SQLException {
-        Connection c = connectionClass.getConnection();
+        Connection c = connectionMaker.getConnection();
 
         PreparedStatement ps = c.prepareStatement("DELETE FROM users");
 
@@ -53,7 +58,7 @@ public class UserDao {
     }
 
     public int getCount() throws SQLException {
-        Connection c = connectionClass.getConnection();
+        Connection c = connectionMaker.getConnection();
 
         PreparedStatement ps = c.prepareStatement("SELECT count(*) FROM users");
 
